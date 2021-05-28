@@ -1,10 +1,7 @@
 from collections import defaultdict
 from torch.utils.data import Dataset
 from nltk.tokenize import TweetTokenizer
-import os
-import io
-import json
-import torch
+import os, io, json, torch, re
 import numpy as np
 from utils.model_utils import OrderedCounter
 
@@ -155,3 +152,121 @@ class TextDataLoader(Dataset):
 
     def get_i2w(self):
         return self.i2w
+
+
+
+def clean_sentences(file):
+    try:
+        f = open(file,'r')
+        cleaned = []
+        remove = ['<eos>','“','”','"','"“','“','<eos>"','•','·','●','-']
+        generated_sentences = f.readlines()
+        for idx,line in enumerate(generated_sentences):
+            line = re.sub(r'<eos>',"",line)
+            splitted = line.split()
+            for word in splitted:
+                if word in remove:
+                    splitted.remove(word)
+            string = ""
+            punc = [',','.',"’",'!','?',"'",'(',')', ':']
+            apostrophe1 = "’"
+            apostrophe2 = "'"
+            apostrophe_check=0
+            line_begin = 1
+
+            for clrs in splitted:
+                if clrs in punc:
+                    if clrs == apostrophe1 or clrs == apostrophe2:
+                        string += "'"
+                        apostrophe_check = 1
+                    else:
+                        string += clr
+                else:
+                    if apostrophe_check == 0:
+                        if line_begin == 1:
+                            string += clrs
+                            line_begin = 0
+                        else:
+                            string += " " + clrs
+                    else:
+                        string += clrs
+                        apostrophe_check = 0
+            if 'caz' in string:
+                string = string.replace('caz', 'c az')
+            if 'cparçalı' in string:
+                string = string.replace('cparçalı','c parçalı')
+            if '(' in string:
+                string = string.replace('( ','(')
+            if 'i̇' in string:
+                string = string.replace('i̇','i')
+            if '‘ ' in string:
+                string = string.replace('‘ ',"'")
+            if '‘' in string:
+                string = string.replace('‘',"'")
+
+            cleaned.append(string)
+            string = ""
+        return cleaned
+    except:
+        raise FileExistsError()
+
+
+def select_k(samples: list, k=1, unk_threshold = 1, repeat_threshold = 3, printall = False):
+    if printall:
+        print(*samples,sep='\n')
+
+    sentences = []
+    for sentence in samples:
+        wordfreq = defaultdict(int)
+        not_necessary = ['','<eos>','\“','\”','\"',',','.','?','!',':']
+        if '<eos>' in sentence:
+            words = sentence.split()
+            for raw_word in words:
+                if raw_word not in not_necessary:
+                    wordfreq[raw_word] +=1
+            if len(wordfreq) != 0:
+                approval_counter = 0
+                general_counter = 0
+                if wordfreq['<unk>'] <= unk_threshold:
+                    for word, freq in wordfreq.items():
+                        if word not in not_necessary:
+                            general_counter += 1
+                            if freq <=repeat_threshold:
+                                approval_counter += 1
+                if (approval_counter == general_counter) and (general_counter != 0 and approval_counter!=0) and (len(sentence.split())  > k):
+                    sentences.append(sentence)
+                approval_counter = 0
+                general_counter = 0
+    return sentences
+
+def save_sentences(sentences: list, file: str, population=False):
+    if not population:
+        for sentence in sentences:
+            try:
+                with open(file, 'a') as f:
+                    f.write(sentence+"\n")
+            except:
+                raise FileExistsError()
+    else:
+        for samples in sentences:
+            for sentence in samples:
+                try:
+                    with open(file, 'a') as f:
+                        f.write(sentence+"\n")
+                except:
+                    raise FileExistsError()
+
+def clear_duplicates(file: str):
+    try:
+        with open(file, "r") as f:
+            lines = [line.rstrip() for line in f]
+        lines = list(dict.fromkeys(lines))
+
+        with open("augmentations.txt", "w") as f:
+            for row in lines:
+                s = "".join(map(str, row))
+                file.write(s+'\n')
+        print(f"Total augmented sentences: {len(lines)}")
+    except:
+        OSError()
+
