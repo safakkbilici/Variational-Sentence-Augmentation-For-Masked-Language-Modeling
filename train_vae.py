@@ -101,9 +101,6 @@ if __name__ == "__main__":
     model = VariationalGRU(**params)
     model = model.to(device)
 
-    save_model_path = os.path.join(args.save_model_path, ts)
-    os.makedirs(save_model_path)
-
     with open(os.path.join(save_model_path, 'model_params.json'), 'w') as f:
         json.dump(params, f, indent=4)
 
@@ -166,13 +163,6 @@ if __name__ == "__main__":
                     tracker['z'] = torch.cat((tracker['z'], z.data), dim=0)
 
             print("%s Epoch %02d/%i, Mean ELBO %9.4f" % (split.upper(), epoch, args.epochs, tracker['ELBO'].mean()))
-
-            if split == 'valid':
-                dump = {'target_sents': tracker['target_sents'], 'z': tracker['z'].tolist()}
-                if not os.path.exists(os.path.join('dumps', ts)):
-                    os.makedirs('dumps/'+ts)
-                with open(os.path.join('dumps/'+ts+'/valid_E%i.json' % epoch), 'w') as dump_file:
-                    json.dump(dump,dump_file)
 
             if split == 'train':
                 checkpoint_path = os.path.join(save_model_path, "vae_epoch%i.pt" % epoch)
