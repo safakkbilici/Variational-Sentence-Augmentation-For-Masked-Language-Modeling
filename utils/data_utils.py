@@ -7,7 +7,7 @@ from utils.model_utils import OrderedCounter
 
 class TextDataLoader(Dataset):
     def __init__(self, data_name, data_dir, split, create_data, **kwargs):
-        super(DataLoader, self).__init__()
+        super(TextDataLoader, self).__init__()
         self.data_dir = data_dir
         self.split = split
         self.max_sequence_length = kwargs.get('max_sequence_length', 50)
@@ -39,7 +39,7 @@ class TextDataLoader(Dataset):
             self.w2i, self.i2w = vocab['w2i'], vocab['i2w']
 
     def _load_vocab(self,vocab=True):
-         with open(os.path.join(self.data_dir, self.vocab_file), 'r') as vocab_file:
+        with open(os.path.join(self.data_dir, self.vocab_file), 'r') as vocab_file:
             vocab = json.load(vocab_file)
         self.w2i, self.i2w = vocab['w2i'], vocab['i2w']
 
@@ -269,4 +269,3 @@ def clear_duplicates(file: str):
         print(f"Total augmented sentences: {len(lines)}")
     except:
         OSError()
-
