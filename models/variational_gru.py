@@ -7,12 +7,14 @@ import torch.nn.utils.rnn as rnn_utils
 from utils.model_utils import to_var
 
 class VariationalGRU(nn.Module):
-    def __init__(self, vocab_size, embedding_size, hidden_size, word_dropout, embedding_dropout,
+    def __init__(self, vocab_size, embedding_size, hidden_size, word_dropout, embedding_dropout, device,
                  latent_size, sos_idx, eos_idx, pad_idx, unk_idx, max_sequence_length, num_layers=1, bidirectional=False):
         super(VariationalGRU, self).__init__()
 
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.tensor = torch.cuda.FloatTensor
+        if device.type=="cuda":
+            self.tensor = torch.cuda.FloatTensor
+        else:
+            self.tensor = torch.Tensor
 
         self.sos_idx = sos_idx
         self.eos_idx = eos_idx
