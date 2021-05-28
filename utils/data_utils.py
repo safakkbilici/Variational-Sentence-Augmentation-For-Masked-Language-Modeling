@@ -8,7 +8,7 @@ import torch
 import numpy as np
 from utils.model_utils import OrderedCounter
 
-class DataLoader(Dataset):
+class TextDataLoader(Dataset):
     def __init__(self, data_name, data_dir, split, create_data, **kwargs):
         super(DataLoader, self).__init__()
         self.data_dir = data_dir
