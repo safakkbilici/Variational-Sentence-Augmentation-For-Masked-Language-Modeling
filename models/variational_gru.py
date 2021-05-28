@@ -11,7 +11,7 @@ class VariationalGRU(nn.Module):
                  latent_size, sos_idx, eos_idx, pad_idx, unk_idx, max_sequence_length, num_layers=1, bidirectional=False):
         super(VariationalGRU, self).__init__()
 
-        if device.type=="cuda":
+        if device=="cuda":
             self.tensor = torch.cuda.FloatTensor
         else:
             self.tensor = torch.Tensor
