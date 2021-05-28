@@ -5,7 +5,6 @@ import torch
 import argparse
 import numpy as np
 from multiprocessing import cpu_count
-from tensorboardX import SummaryWriter
 from torch.utils.data import DataLoader
 from collections import OrderedDict, defaultdict
 
@@ -73,7 +72,7 @@ if __name__ == "__main__":
 
     for split in splits:
         datasets[split] = TextDataLoader(
-            data_name=args.data_name
+            data_name=args.data_name,
             data_dir=args.data_dir,
             split=split,
             create_data=args.create_data,
@@ -94,14 +93,14 @@ if __name__ == "__main__":
         embedding_dropout=args.embedding_dropout,
         latent_size=args.latent_size,
         num_layers=args.num_layers,
-        bidirectional=args.bidirectional
+        bidirectional=args.bidirectional,
         device=device.type
     )
 
     model = VariationalGRU(**params)
     model = model.to(device)
 
-    with open(os.path.join(save_model_path, 'model_params.json'), 'w') as f:
+    with open(os.path.join(args.save_model_path, 'model_params.json'), 'w') as f:
         json.dump(params, f, indent=4)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate)
@@ -165,6 +164,6 @@ if __name__ == "__main__":
             print("%s Epoch %02d/%i, Mean ELBO %9.4f" % (split.upper(), epoch, args.epochs, tracker['ELBO'].mean()))
 
             if split == 'train':
-                checkpoint_path = os.path.join(save_model_path, "vae_epoch%i.pt" % epoch)
+                checkpoint_path = os.path.join(args.save_model_path, "vae_epoch%i.pt" % epoch)
                 torch.save(model.state_dict(), checkpoint_path)
                 print("Model saved at %s" % checkpoint_path)
