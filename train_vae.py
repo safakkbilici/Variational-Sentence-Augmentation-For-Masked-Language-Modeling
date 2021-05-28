@@ -95,6 +95,7 @@ if __name__ == "__main__":
         latent_size=args.latent_size,
         num_layers=args.num_layers,
         bidirectional=args.bidirectional
+        device=device
     )
 
     model = VariationalGRU(**params)
