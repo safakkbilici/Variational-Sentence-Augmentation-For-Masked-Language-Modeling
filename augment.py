@@ -2,10 +2,11 @@ from models.variational_gru import VariationalGRU
 from utils.model_utils import to_var, idx2word, interpolate
 from utils.data_utils import clean_sentences, select_k, save_sentences, clear_duplicates
 
-import json, os, torch
+import json, os, torch, argparse
 from tqdm import tqdm
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser() 
     parser.add_argument('-dn','--data_name', type=str, default='data')
     parser.add_argument('-ddir','--data_dir', type=str, default='data')
     parser.add_argument('-bin', '--save_model_path', type=str, default='models')
@@ -15,11 +16,13 @@ if __name__ == "__main__":
     parser.add_argument('-b', '--batch_size', type=int, default=10)
     parser.add_argument('-ml', '--min_sentence_length', type=int, default=3)
     parser.add_argument('-ut', '--unk_threshold', type=int, default=3)
+    args = parser.parse_args()
 
     with open(args.data_dir+f'/{args.data_name}.vocab.json', 'r') as f:
         vocab = json.load(f)
 
-    with open(os.path.join(args.model_path, "model_params.json"), "r") as f:
+    w2i, i2w = vocab['w2i'], vocab['i2w']
+    with open(os.path.join(args.save_model_path, "model_params.json"), "r") as f:
         params = json.load(f)
 
     load_checkpoint = args.checkpoint
@@ -33,11 +36,11 @@ if __name__ == "__main__":
         device = torch.device("cpu")
 
     model = model.to(device)
-
+    latent_size = params["latent_size"]
     population_sentences = []
     for randomness in tqdm(range(args.generate_iteration)):
         model.eval()
-        samples, z = model.inference(n=num_samples)
+        samples, z = model.inference(n=args.num_samples)
         samples = idx2word(samples, i2w=i2w, pad_idx=w2i['<pad>'])
 
         z1 = torch.randn([latent_size]).numpy()
@@ -56,11 +59,6 @@ if __name__ == "__main__":
 
 
     save_sentences(population_sentences, file = 'generated_all.txt', population=True)
-
-    population_sentences_flat = [item for sublist in population_sentences for item in sublist]
-    print(f"Total generated: {len(population_sentences_flat)}")
-
-    del population_sentences_flat
 
     cleaned = clean_sentences('generated_all.txt')
     save_sentences(cleaned, file = 'cleaned.txt')
