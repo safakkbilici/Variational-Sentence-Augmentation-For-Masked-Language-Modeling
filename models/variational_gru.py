@@ -123,7 +123,7 @@ class VariationalGRU(nn.Module):
 
         hidden = hidden.unsqueeze(0)
         sequence_idx = torch.arange(0, batch_size, out=self.tensor()).long()
-        equence_running = torch.arange(0, batch_size, out=self.tensor()).long()
+        sequence_running = torch.arange(0, batch_size, out=self.tensor()).long()
         sequence_mask = torch.ones(batch_size, out=self.tensor()).bool()
         running_seqs = torch.arange(0, batch_size, out=self.tensor()).long()
 
