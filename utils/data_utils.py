@@ -180,7 +180,7 @@ def clean_sentences(file):
                         string += "'"
                         apostrophe_check = 1
                     else:
-                        string += clr
+                        string += clrs
                 else:
                     if apostrophe_check == 0:
                         if line_begin == 1:
@@ -265,7 +265,7 @@ def clear_duplicates(file: str):
         with open("augmentations.txt", "w") as f:
             for row in lines:
                 s = "".join(map(str, row))
-                file.write(s+'\n')
+                f.write(s+'\n')
         print(f"Total augmented sentences: {len(lines)}")
     except:
         OSError()
