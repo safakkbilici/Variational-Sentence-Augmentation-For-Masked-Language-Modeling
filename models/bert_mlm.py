@@ -44,7 +44,7 @@ def bert_dataset(tokenizer, file_path, block_size=64, mlm_prob=0.15):
     return dataset, data_collator
 
 
-def train_bert(model, epochs, train_batch_size, data_collator, dataset, checkpoint_output, batch_size, log_step):
+def train_bert(model, epochs, data_collator, dataset, checkpoint_output, batch_size, log_step):
 
     training_args = TrainingArguments(
         output_dir = checkpoint_output,
@@ -63,9 +63,3 @@ def train_bert(model, epochs, train_batch_size, data_collator, dataset, checkpoi
     )
 
     trainer.train()
-        
-        
-        
-        
-        
-    
