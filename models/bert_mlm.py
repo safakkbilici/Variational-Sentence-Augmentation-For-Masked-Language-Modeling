@@ -11,7 +11,7 @@ from transformers import Trainer, TrainingArguments
 def bert_model(vocab_size=52000, max_position_embeddings=514, num_attention_heads=12,
                num_hidden_layers=6, type_vocab_size=1, from_checkpoints=None, cuda=True):
     
-    if load_checkpoints != None:
+    if from_checkpoints != None:
         model = BertForMaskedLM.from_pretrained(from_checkpoints)
     else:
         config = BertConfig(
@@ -21,6 +21,8 @@ def bert_model(vocab_size=52000, max_position_embeddings=514, num_attention_head
             type_vocab_size = type_vocab_size,
         )
 
+        model = BertForMaskedLM(config)
+
     if cuda:
         if torch.cuda.is_available():
             model = model.cuda()
@@ -29,6 +31,7 @@ def bert_model(vocab_size=52000, max_position_embeddings=514, num_attention_head
     return model
 
 def bert_dataset(tokenizer, file_path, block_size=64, mlm_prob=0.15):
+    tokenizer = BertTokenizer.from_pretrained(tokenizer)
     dataset = LineByLineTextDataset(
         tokenizer = tokenizer,
         file_path = file_path,
@@ -40,7 +43,7 @@ def bert_dataset(tokenizer, file_path, block_size=64, mlm_prob=0.15):
         mlm=True,
         mlm_probability = mlm_prob
     )
-    print("Number of samples: {len(dataset.examples)}")
+    print(f"Number of samples: {len(dataset.examples)}")
     return dataset, data_collator
 
 
