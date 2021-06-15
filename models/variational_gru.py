@@ -167,7 +167,3 @@ class VariationalGRU(nn.Module):
         running_latest[:,t] = sample.data
         save_to[running_seqs] = running_latest
         return save_to
-
-
-
-
