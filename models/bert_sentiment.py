@@ -66,12 +66,12 @@ def preprocess_data(data, tokenizer, max_len):
 
 def get_data_loaders(df_train, df_test, tokenizer, batch_size=32):
     tokenizer = BertTokenizer.from_pretrained(tokenizer)
-    all_data = np.concatenate([df_train.target.values, df_test.target.values])
+    all_data = np.concatenate([df_train.sentence.values, df_test.sentence.values])
     encoded_data = [tokenizer.encode(sentence, add_special_tokens=True) for sentence in all_data]
     max_len = max([len(sentence) for sentence in encoded_tweets])
 
-    train_ids, train_masks = preprocess_data(df_train.target.values, tokenizer, max_len)
-    val_ids, val_masks = preprocess_data(df_test.target.values, tokenizer, max_len)
+    train_ids, train_masks = preprocess_data(df_train.sentence.values, tokenizer, max_len)
+    val_ids, val_masks = preprocess_data(df_test.sentence.values, tokenizer, max_len)
 
     train_labels = torch.LongTensor(df_train.target.values)
     val_labels = torch.LongTensor(df_test.target.values)
@@ -88,9 +88,7 @@ def get_data_loaders(df_train, df_test, tokenizer, batch_size=32):
     return train_dataloader, val_dataloader
 
 
-            
-
-def train(model, train_dataloader, val_dataloader, loss_fn, epochs=2, evaluation=True, cuda=True):
+def train_sentiment_model(model, train_dataloader, val_dataloader, optimizer, loss_fn, epochs=2, evaluation=True, cuda=True):
     if cuda == True and torch.cuda.is_available() == False:
         print("Cannot detect cuda device. Switching cpu")
     elif cuda == True and torch.cuda.is_available():
@@ -140,6 +138,7 @@ def train(model, train_dataloader, val_dataloader, loss_fn, epochs=2, evaluation
             print("-"*70)
         print("\n")
     print("Training complete!")
+    return model, optimizer
 
 def evaluate(model, val_dataloader, loss_fn):
 
@@ -173,10 +172,10 @@ def bert_sentiment_model(pretrained, epochs=2, cuda=True, load_model=False,
     if load_model or load_optimizer:
         checkpoint = torch.load(load_path, map_location="cpu")
     if load_model:
-        bert_classifier = BertClassifier(pretrained,freeze_bert=True)
+        bert_classifier = BertSentiment(pretrained,freeze_bert=True)
         bert_classifier.load_state_dict(checkpoint['model_state_dict'])
     else:
-        bert_classifier = BertClassifier(pretrained,freeze_bert=True)
+        bert_classifier = BertSentiment(pretrained,freeze_bert=True)
 
     
      if cuda == True and torch.cuda.is_available() == False:
@@ -208,7 +207,7 @@ def bert_sentiment_model(pretrained, epochs=2, cuda=True, load_model=False,
 
     return bert_classifier, optimizer, scheduler, loss_fn
 
-def save(model, optimizer=None, path="models/bert_sentiment/sentiment.pt"):
+def save_sentiment_model(model, optimizer=None, path="models/bert_sentiment/sentiment.pt"):
     if optimizer != None:
         torch.save({
             'model_state_dict': model.state_dict(),
