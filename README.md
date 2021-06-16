@@ -1,1 +1,1 @@
-# Variational-Sentence-Augmentation-For-Masked-Language-Modeling
+# Variational Sentence Augmentation For Masked Language Modeling
