@@ -178,14 +178,15 @@ def bert_sentiment_model(pretrained, epochs=2, cuda=True, load_model=False,
         bert_classifier = BertSentiment(pretrained,freeze_bert=True)
 
     
-     if cuda == True and torch.cuda.is_available() == False:
+    if cuda == True and torch.cuda.is_available() == False:
         print("Cannot detect cuda device. Switching cpu")
+        device = torch.device("cpu")
     elif cuda == True and torch.cuda.is_available():
         device = torch.device("cuda")
-        bert_classifier.to(device)
     else:
         device = torch.device("cpu")
-        bert_classifier.to(device)
+
+    bert_classifier.to(device)
         
     optimizer = AdamW(
         bert_classifier.parameters(),
