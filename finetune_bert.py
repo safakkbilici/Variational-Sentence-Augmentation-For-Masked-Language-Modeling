@@ -38,8 +38,9 @@ if __name__ == "__main__":
             tokenizer = args.tokenizer,
             batch_size = args.batch_size)
 
-        bert_sentiment_model, optimizer, scheduler, loss_fn = bert_sentiment_model(
+        bert_model, optimizer, scheduler, loss_fn = bert_sentiment_model(
             pretrained = args.bert_model,
+            train_dataloader = train_loader,
             epochs = args.epochs,
             cuda = args.cuda,
             load_model = args.load_downstream_model,
@@ -47,27 +48,28 @@ if __name__ == "__main__":
             load_path = args.downstream_checkpoints_path
         )
 
-        bert_sentiment_model, optimizer = train_sentiment_model(
-            model = bert_sentiment_model,
+        bert_model, optimizer = train_sentiment_model(
+            model = bert_model,
             train_dataloader = train_loader,
             val_dataloader = val_loader,
             optimizer = optimizer,
             loss_fn = loss_fn,
             epochs = args.epochs,
             evaluation = args.evaluation,
-            cuda = args.cuda
+            cuda = args.cuda,
+            scheduler = scheduler
         )
 
         if args.save_downstream_model and args.save_downstream_optimizer:
             save_sentiment_model(
-                model = bert_sentiment_model,
+                model = bert_model,
                 optimizer = optimizer,
                 path = args.save_downstream_path
             )
     
         elif args.save_downstream_model and args.save_downstream_optimizer == False:
             save_sentiment_model(
-                model = bert_sentiment_model,
+                model = bert_model,
                 path = args.save_downstream_path
             )
     
