@@ -58,7 +58,7 @@ def train_bert(model, epochs, data_collator, dataset, checkpoint_output, batch_s
         save_steps = len(dataset.examples) // batch_size
     )
 
-    trainer = trainer(
+    trainer = Trainer(
         model = model,
         args = training_args,
         data_collator = data_collator,
@@ -66,3 +66,4 @@ def train_bert(model, epochs, data_collator, dataset, checkpoint_output, batch_s
     )
 
     trainer.train()
+    trainer.save_model("./models7")

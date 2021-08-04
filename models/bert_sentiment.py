@@ -57,7 +57,7 @@ def preprocess_data(data, tokenizer, max_len):
             return_attention_mask = True
         )
         input_ids.append(encoded_sent.get('input_ids'))
-        attention_masks.append(encoded_sent.get('attention_masks'))
+        attention_masks.append(encoded_sent.get('attention_mask'))
 
     input_ids = torch.tensor(input_ids)
     attention_masks = torch.tensor(attention_masks)
@@ -68,7 +68,7 @@ def get_data_loaders(df_train, df_test, tokenizer, batch_size=32):
     tokenizer = BertTokenizer.from_pretrained(tokenizer)
     all_data = np.concatenate([df_train.sentence.values, df_test.sentence.values])
     encoded_data = [tokenizer.encode(sentence, add_special_tokens=True) for sentence in all_data]
-    max_len = max([len(sentence) for sentence in encoded_tweets])
+    max_len = max([len(sentence) for sentence in encoded_data])
 
     train_ids, train_masks = preprocess_data(df_train.sentence.values, tokenizer, max_len)
     val_ids, val_masks = preprocess_data(df_test.sentence.values, tokenizer, max_len)
@@ -88,7 +88,7 @@ def get_data_loaders(df_train, df_test, tokenizer, batch_size=32):
     return train_dataloader, val_dataloader
 
 
-def train_sentiment_model(model, train_dataloader, val_dataloader, optimizer, loss_fn, epochs=2, evaluation=True, cuda=True):
+def train_sentiment_model(model, train_dataloader, val_dataloader, optimizer, scheduler, loss_fn, epochs=2, evaluation=True, cuda=True):
     if cuda == True and torch.cuda.is_available() == False:
         print("Cannot detect cuda device. Switching cpu")
     elif cuda == True and torch.cuda.is_available():
@@ -123,7 +123,7 @@ def train_sentiment_model(model, train_dataloader, val_dataloader, optimizer, lo
 
             if (step % 20 == 0 and step != 0) or (step == len(train_dataloader) - 1):
                 time_elapsed = time.time() - t0_batch
-                print(f"{epoch_i + 1:^7} | {step:^7} | {batch_loss / batch_counts:^12.6f} | {'-':^10} | {'-':^9} | {time_elapsed:^9.2f}")
+                print(f"{epoch + 1:^7} | {step:^7} | {batch_loss / batch_counts:^12.6f} | {'-':^10} | {'-':^9} | {time_elapsed:^9.2f}")
                 batch_loss, batch_counts = 0, 0
                 t0_batch = time.time()
         avg_train_loss = total_loss / len(train_dataloader)
@@ -131,16 +131,16 @@ def train_sentiment_model(model, train_dataloader, val_dataloader, optimizer, lo
         print("-"*70)
 
         if evaluation:
-            val_loss, val_accuracy = evaluate(model, val_dataloader)
+            val_loss, val_accuracy = evaluate(model, val_dataloader, loss_fn, device)
 
             time_elapsed = time.time() - t0_epoch
-            print(f"{epoch_i + 1:^7} | {'-':^7} | {avg_train_loss:^12.6f} | {val_loss:^10.6f} | {val_accuracy:^9.2f} | {time_elapsed:^9.2f}")
+            print(f"{epoch + 1:^7} | {'-':^7} | {avg_train_loss:^12.6f} | {val_loss:^10.6f} | {val_accuracy:^9.2f} | {time_elapsed:^9.2f}")
             print("-"*70)
         print("\n")
     print("Training complete!")
     return model, optimizer
 
-def evaluate(model, val_dataloader, loss_fn):
+def evaluate(model, val_dataloader, loss_fn, device):
 
     model.eval()
     val_accuracy = []
@@ -166,16 +166,16 @@ def evaluate(model, val_dataloader, loss_fn):
     return val_loss, val_accuracy
 
 
-def bert_sentiment_model(pretrained, epochs=2, cuda=True, load_model=False,
+def bert_sentiment_model(pretrained, train_dataloader,epochs=2, cuda=True, load_model=False,
                          load_optimizer=False, load_path="models/bert_sentiment/sentiment.pt"):
     
     if load_model or load_optimizer:
         checkpoint = torch.load(load_path, map_location="cpu")
     if load_model:
-        bert_classifier = BertSentiment(pretrained,freeze_bert=True)
+        bert_classifier = BERTSentiment(pretrained,freeze_bert=True)
         bert_classifier.load_state_dict(checkpoint['model_state_dict'])
     else:
-        bert_classifier = BertSentiment(pretrained,freeze_bert=True)
+        bert_classifier = BERTSentiment(pretrained,freeze_bert=True)
 
     
     if cuda == True and torch.cuda.is_available() == False:
