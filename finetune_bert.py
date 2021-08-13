@@ -10,6 +10,12 @@ from models.bert_sentiment import (
     save_sentiment_model
 )
 
+from models.bert_ner import(
+    get_iterators,
+    bert_ner_model,
+    train_ner_model
+)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-dt', '--downstream_task', type=str)
@@ -36,7 +42,8 @@ if __name__ == "__main__":
             df_train = df_train,
             df_test = df_test,
             tokenizer = args.tokenizer,
-            batch_size = args.batch_size)
+            batch_size = args.batch_size
+        )
 
         bert_model, optimizer, scheduler, loss_fn = bert_sentiment_model(
             pretrained = args.bert_model,
@@ -73,3 +80,37 @@ if __name__ == "__main__":
                 path = args.save_downstream_path
             )
     
+    elif args.downstream_task == "sequence labeling":
+        df_train = pd.read_csv(f"{args.dataset}/train.csv")
+        df_test = pd.read_csv(f"{args.dataset}/test.csv")
+
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        if not args.cuda:
+            device = torch.device("cpu")
+        
+        train_iterator, valid_iterator, test_iterator, TEXT, TAGS = get_iterators(
+            df_train = df_train,
+            df_test = df_test,
+            tokenizer = args.tokenizer,
+            batch_size = args.batch_size,
+            transformers = True,
+            device = device
+        )
+
+        bert_model = bert_ner_model(
+            model_name = args.bert_model
+            output_dim = len(TAGS),
+            TEXT = TEXT,
+            TAGS = TAGS,
+            dropout = 0.2,
+            device = device,
+            cuda = args.cuda
+        )
+            
+        bert_model = train_ner_model(
+            model = bert_model,
+            train_iterator = train_iterator,
+            val_iterator = valid_iterator,
+            eval_metrics = ["acc"],
+            epochs = args.epochs
+        )
