@@ -6,11 +6,18 @@ Code for our paper "Variational Sentence Augmentation For Masked Language Modeli
 
 ## Train On Your Corpus
 Organize your folder structure as:
+```
       data---
             |
             -- corpus.train.txt
             |
             -- corpus.valid.txt
-        
+```
+
+then
       
 ```python3
+!python train_vae.py --data_name "corpus" --print_every 50 --epochs 1
+```
+
+for more detailed arguments, see the [source file](https://github.com/safakkbilici/Variational-Sentence-Augmentation-For-Masked-Language-Modeling/blob/main/train_vae.py).
