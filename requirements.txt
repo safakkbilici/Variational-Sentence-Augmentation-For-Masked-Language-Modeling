@@ -1,0 +1,3 @@
+x-tagger
+transformers
+torch
