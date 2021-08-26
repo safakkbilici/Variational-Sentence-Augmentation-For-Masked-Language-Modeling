@@ -25,7 +25,9 @@ for more detailed arguments, see the [source file](https://github.com/safakkbili
 ## Generate New Sentences
 
 ```bash
-python3 augment.py  --data_name "corpus" --checkpoint "/models/vae_epoch{epoch}.pt" --generate_iteration 100 --unk_threshold 0
+python3 augment.py  --data_name "corpus" \
+                    --checkpoint "/models/vae_epoch{epoch}.pt" \
+                    --generate_iteration 100 --unk_threshold 0
 ```
 for more detailed arguments, see the [source file](https://github.com/safakkbilici/Variational-Sentence-Augmentation-For-Masked-Language-Modeling/blob/main/augment.py).
 
@@ -35,7 +37,9 @@ The augmented sentences are saved in ```augmentations.txt```. Join this file wit
 ## Increase The Performance Of Pretraining
 
 ```bash
-python3 pretrain_bert.py --epochs 1 --tokenizer "./tokenizer" --data "data/corpus.joined.txt"
+python3 pretrain_bert.py --epochs 1 \
+                         --tokenizer "./tokenizer" \
+                         --data "data/corpus.joined.txt"
 ```
 for more detailed arguments, see the [source file](https://github.com/safakkbilici/Variational-Sentence-Augmentation-For-Masked-Language-Modeling/blob/main/pretrain_bert.py).
 
@@ -61,7 +65,10 @@ df_test.to_csv("test.csv",index=False)
 Then finetune pretrained BERT
 
 ```bash
-python3 finetune_bert.py --downstream_task "sequence classification" --bert_model "./models7" --dataset "." --tokenizer "./tokenizer"
+python3 finetune_bert.py --downstream_task "sequence classification" \
+                         --bert_model "./models7" \
+                         --dataset "." \
+                         --tokenizer "./tokenizer"
 ```
 ## Increase The Performance Of Finetuning (Sequence Labeling)
 
@@ -96,7 +103,10 @@ df_test.to_csv("test.csv", index=False)
 Then finetune pretrained BERT
 
 ```bash
-!python finetune_bert.py --downstream_task "sequence labeling" --bert_model "./models7" --dataset "." --tokenizer "./tokenizer"
+!python finetune_bert.py --downstream_task "sequence labeling" 
+                         --bert_model "./models7" \
+                         --dataset "." \
+                         --tokenizer "./tokenizer"
 ```
 
 
