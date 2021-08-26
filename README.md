@@ -16,8 +16,87 @@ Organize your folder structure as:
 
 then
       
-```python3
-!python train_vae.py --data_name "corpus" --print_every 50 --epochs 1
+```bash
+python3 train_vae.py --data_name "corpus" --print_every 50 --epochs 1
 ```
 
 for more detailed arguments, see the [source file](https://github.com/safakkbilici/Variational-Sentence-Augmentation-For-Masked-Language-Modeling/blob/main/train_vae.py).
+
+## Generate New Sentences
+
+```bash
+python3 augment.py  --data_name "corpus" --checkpoint "/models/vae_epoch{epoch}.pt" --generate_iteration 100 --unk_threshold 0
+```
+for more detailed arguments, see the [source file](https://github.com/safakkbilici/Variational-Sentence-Augmentation-For-Masked-Language-Modeling/blob/main/augment.py).
+
+The augmented sentences are saved in ```augmentations.txt```. Join this file with original corpus.
+
+
+## Increase The Performance Of Pretraining
+
+```bash
+python3 pretrain_bert.py --epochs 1 --tokenizer "./tokenizer" --data "data/corpus.joined.txt"
+```
+for more detailed arguments, see the [source file](https://github.com/safakkbilici/Variational-Sentence-Augmentation-For-Masked-Language-Modeling/blob/main/pretrain_bert.py).
+
+## Increase The Performance Of Finetuning (Sequence Classification)
+
+Prepare you dataframe (example):
+
+```python
+
+import pandas as pd
+import numpy as np
+
+df_train = pd.read_csv('train.csv',names = ['sentence','target'])
+df_test = pd.read_csv('test.csv', names = ['sentence','target'])
+
+df_train['target'] = df_train['target'].astype(np.float16)
+df_test['target'] = df_test['target'].astype(np.float16)
+
+df_train.to_csv("train.csv",index=False)
+df_test.to_csv("test.csv",index=False)
+```
+
+Then finetune pretrained BERT
+
+```bash
+python3 finetune_bert.py --downstream_task "sequence classification" --bert_model "./models7" --dataset "." --tokenizer "./tokenizer"
+```
+## Increase The Performance Of Finetuning (Sequence Labeling)
+
+Prepare your dataframe (example):
+
+```python
+from datasets import load_dataset
+dataset = load_dataset("wikiann", "tr")
+
+ner_encoding = {0: "O", 1: "B-PER", 2: "I-PER", 3: "B-ORG", 4: "I-ORG", 5: "B-LOC", 6: "I-LOC"}
+
+
+train_tokens = []
+train_tags = []
+for sample in dataset["train"]:
+  train_tokens.append(' '.join(sample["tokens"]))
+  train_tags.append(' '.join([ner_encoding[a] for a in sample["ner_tags"]]))
+
+test_tokens = []
+test_tags = []
+for sample in dataset["test"]:
+  test_tokens.append(' '.join(sample["tokens"]))
+  test_tags.append(' '.join([ner_encoding[a] for a in sample["ner_tags"]]))
+
+df_train = pd.DataFrame({"sentence": train_tokens, "tags": train_tags})
+df_test = pd.DataFrame({"sentence": test_tokens, "tags": test_tags})
+
+df_train.to_csv("train.csv", index=False)
+df_test.to_csv("test.csv", index=False)
+```
+
+Then finetune pretrained BERT
+
+```bash
+!python finetune_bert.py --downstream_task "sequence labeling" --bert_model "./models7" --dataset "." --tokenizer "./tokenizer"
+```
+
+
