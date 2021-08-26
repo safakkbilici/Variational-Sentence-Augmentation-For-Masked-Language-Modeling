@@ -32,7 +32,7 @@ class BERTSentiment(nn.Module):
                 param.requires_grad = False
 
     def forward(self, token_ids, attention_masks):
-        outputs = self.bert(input_ids = token_ids, attention_masks=attention_masks)
+        outputs = self.bert(input_ids = token_ids, attention_mask=attention_masks)
         cls_contextual_rep = outputs[0][:, 0, :]
         logits = self.classifier(cls_contextual_rep)
         return logits

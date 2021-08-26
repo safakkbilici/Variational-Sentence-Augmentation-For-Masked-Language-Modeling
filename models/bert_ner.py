@@ -29,8 +29,8 @@ def bert_ner_model(model_name, output_dim, TEXT, TAGS, dropout, device, cuda):
 
 def train_ner_model(model, train_iterator, val_iterator, eval_metrics = ["acc"], epochs = 3):
     model.fit(
-        train_iterator = train_iterator, 
-        valid_iterator = val_iterator, 
+        train_set = train_iterator, 
+        test_set = val_iterator, 
         eval_metrics = eval_metrics, 
         epochs = epochs
     )
