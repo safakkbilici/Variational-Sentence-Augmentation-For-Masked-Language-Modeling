@@ -103,7 +103,7 @@ df_test.to_csv("test.csv", index=False)
 Then finetune pretrained BERT
 
 ```bash
-!python finetune_bert.py --downstream_task "sequence labeling" 
+python3 finetune_bert.py --downstream_task "sequence labeling" 
                          --bert_model "./models7" \
                          --dataset "." \
                          --tokenizer "./tokenizer"
