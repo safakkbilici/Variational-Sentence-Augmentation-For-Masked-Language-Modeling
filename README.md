@@ -109,4 +109,7 @@ Then finetune pretrained BERT
                          --tokenizer "./tokenizer"
 ```
 
+### Authors
 
+- M. Şafak Bilici
+- Mehmet Fatih Amasyali
