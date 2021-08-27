@@ -31,7 +31,7 @@ python3 augment.py  --data_name "corpus" \
 ```
 for more detailed arguments, see the [source file](https://github.com/safakkbilici/Variational-Sentence-Augmentation-For-Masked-Language-Modeling/blob/main/augment.py).
 
-The augmented sentences are saved in ```augmentations.txt```. Join this file with original corpus.
+The augmented sentences are saved in ```augmentations.txt```. Merge this file with original corpus.
 
 
 ## Increase The Performance Of Pretraining
